@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://portfolio-kappa-nine-8m8ao4h0hz.vercel.app/sitemap.xml
