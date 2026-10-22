@@ -34,38 +34,67 @@ const animateSkills = () => {
 window.addEventListener('scroll', animateSkills);
 window.addEventListener('load', animateSkills);
 
-// Contact Form Handler
+// Working Contact Form Handler with FormSubmit AJAX & Mailto fallback
 const contactForm = document.getElementById('contact-form');
 const formSuccess = document.getElementById('form-success');
 
 if (contactForm) {
-  contactForm.addEventListener('submit', (e) => {
+  contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Simulate form submission
     const submitBtn = document.getElementById('contact-form-submit');
+    const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Send Message';
+    
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.innerHTML = 'Sending...';
     }
 
-    setTimeout(() => {
-      contactForm.reset();
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Send Message';
+    const formData = new FormData(contactForm);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/moonishtiak03@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        contactForm.reset();
+        if (formSuccess) {
+          formSuccess.hidden = false;
+          formSuccess.textContent = '✅ Message sent successfully! I will get back to you shortly.';
+          setTimeout(() => {
+            formSuccess.hidden = true;
+          }, 6000);
+        }
+      } else {
+        throw new Error('Form submission failed');
       }
+    } catch (err) {
+      // Graceful fallback to mailto
+      window.location.href = `mailto:moonishtiak03@gmail.com?subject=${encodeURIComponent(data.subject || 'Portfolio Contact')}&body=${encodeURIComponent(data.message || '')}%0A%0AFrom: ${encodeURIComponent(data.name || '')} (${encodeURIComponent(data.email || '')})`;
       if (formSuccess) {
         formSuccess.hidden = false;
+        formSuccess.textContent = '✉️ Message prepared in your mail app. Click Send in your mail client!';
         setTimeout(() => {
           formSuccess.hidden = true;
-        }, 5000);
+        }, 6000);
       }
-    }, 1000);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    }
   });
 }
 
-// Navbar Shadow on Scroll
+// Navbar Shadow & Blur on Scroll
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   if (window.scrollY > 50) {
